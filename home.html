@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homepage</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body>
+
+
+
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-8">
+                <h2>Welcome, <span id="username"></span>!</h2>
+                <!-- Create button to redirect to createTask.html -->
+                <button class="btn btn-success float-right" onclick="redirectToCreateTask()">Create Task</button>
+
+                <h3 class="mt-4">Your Tasks</h3>
+
+                <table class="table mt-2" style="width: 100%">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tasksTableBody"></tbody>
+                </table>
+                <br><br>
+                <!--Logout button-->
+                <button class="btn btn-danger" onclick="logoutUser()">Logout</button>
+                <br><br>
+                <!-- Show admin panel button only if isAdmin is true -->
+                <button class="btn btn-primary" id="adminPanelBtn" style="display: none" onclick="redirectToAdmin()">Go to Admin Panel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        // Fetch user information and tasks on page load
+        window.onload = async function() {
+            await fetchUserInfo();
+            await fetchTasks();
+        }
+
+        async function fetchUserInfo() {
+            let token = localStorage.getItem('token');
+            let headersList = {
+                "Accept": "*/*",
+                "Authorization": "Bearer " + token
+            };
+
+            let reqOptions = {
+                url: "http://127.0.0.1:8000/api/me",
+                method: "GET",
+                headers: headersList,
+            };
+
+            try {
+                let response = await axios.request(reqOptions);
+                document.getElementById('username').innerText = response.data.username;
+
+                // Show admin panel button if the user is an admin
+                if (response.data.isAdmin) {
+                    document.getElementById('adminPanelBtn').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error fetching user info:', error);
+            }
+        }
+
+        async function fetchTasks() {
+            let token = localStorage.getItem('token');
+            let headersList = {
+                "Accept": "application/json",
+                "Authorization": "Bearer " + token
+            };
+
+            let reqOptions = {
+                url: "http://127.0.0.1:8000/api/tasks/retrieve",
+                method: "GET", // Change method to GET
+                headers: headersList,
+            };
+
+            try {
+                let response = await axios.request(reqOptions);
+                displayTasks(response.data);
+            } catch (error) {
+                console.error('Error fetching tasks:', error);
+            }
+        }
+
+        function displayTasks(tasks) {
+            let tasksTableBody = document.getElementById('tasksTableBody');
+            tasksTableBody.innerHTML = '';
+
+            tasks.forEach(task => {
+                let row = `<tr>
+        <td>${task.title}</td>
+        <td>${task.description}</td>
+        <td>${task.status}</td>
+        <td>
+          <button class="btn btn-warning" onclick="updateTask(${task.id})">Update</button>
+          <button class="btn btn-danger" onclick="deleteTask(${task.id})">Delete</button>
+        </td>
+      </tr>`;
+                tasksTableBody.innerHTML += row;
+            });
+        }
+
+        async function logoutUser() {
+            // Clear token from localStorage and redirect to login page
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        }
+
+        function redirectToAdmin() {
+            // Redirect to admin panel page
+            window.location.href = './admin.html';
+        }
+
+        function redirectToCreateTask() {
+            // Redirect to createTask.html
+            window.location.href = './createtask.html';
+        }
+
+        // You can implement updateTask and deleteTask functions based on your requirements
+        function updateTask(taskId) {
+            window.location.href = './updatetask.html?id=' + taskId;
+        }
+
+        async function deleteTask(taskId) {
+            let token = localStorage.getItem('token');
+            let headersList = {
+                "Accept": "application/json",
+                "Authorization": "Bearer " + token
+            };
+
+            let reqOptions = {
+                url: `http://127.0.0.1:8000/api/tasks/delete/${taskId}`,
+                method: "DELETE",
+                headers: headersList,
+            };
+
+            try {
+                let response = await axios.request(reqOptions);
+                console.log(response.data);
+                alert('Task deleted successfully!');
+                // Reload the current page after deletion
+
+                location.reload();
+
+            } catch (error) {
+                console.error('Error deleting task:', error);
+            }
+        }
+    </script>
+
+</body>
+
+</html>

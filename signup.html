@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Form</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body>
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <h2 class="mb-4">Sign Up here</h2>
+                <form id="registrationForm">
+                    <div class="form-group">
+                        <label for="username">Username:</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password:</label>
+                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="isAdmin" name="isAdmin">
+                        <label class="form-check-label" for="isAdmin">Admin</label>
+                    </div>
+                    <div>
+                        <br><br>
+                        <button type="button" class="btn btn-primary" onclick="registerUser()">Sign Up</button>
+                    </div>
+                </form>
+                <div id="responseMessage" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        async function registerUser() {
+            let username = document.getElementById('username').value;
+            let email = document.getElementById('email').value;
+            let password = document.getElementById('password').value;
+            let confirmPassword = document.getElementById('confirmPassword').value;
+            let isAdmin = document.getElementById('isAdmin').checked;
+
+            // Validate password match
+            if (password !== confirmPassword) {
+                document.getElementById('responseMessage').innerHTML = '<div class="alert alert-danger">Passwords do not match</div>';
+                return;
+            }
+
+            let headersList = {
+                "Accept": "application/json",
+                "Content-Type": "application/json"
+            };
+
+            let bodyContent = JSON.stringify({
+                "username": username,
+                "email": email,
+                "password": password,
+                "password_confirmation": confirmPassword,
+                "isAdmin": isAdmin
+            });
+
+            let reqOptions = {
+                url: "http://127.0.0.1:8000/api/register",
+                method: "POST",
+                headers: headersList,
+                data: bodyContent,
+            };
+
+            try {
+                let response = await axios.request(reqOptions);
+                document.getElementById('responseMessage').innerHTML = '<div class="alert alert-success">Registration successful</div>';
+                setTimeout(() => {
+                    window.location.href = './login.html'; // Redirect after 2 seconds
+                }, 2000);
+
+            } catch (error) {
+                document.getElementById('responseMessage').innerHTML = '<div class="alert alert-danger">Registration failed</div>';
+                console.error('Error:', error);
+            }
+        }
+    </script>
+
+</body>
+
+</html>
