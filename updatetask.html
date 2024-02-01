@@ -63,9 +63,10 @@
             try {
                 let response = await axios.request(reqOptions);
                 // Pre-fill the form with task details
-                document.getElementById('title').value = response.data.title;
-                document.getElementById('description').value = response.data.description;
-                document.getElementById('status').value = response.data.status;
+                console.log(response.data);
+                document.getElementById('title').value = response.data.task.title;
+                document.getElementById('description').value = response.data.task.description;
+                document.getElementById('status').value = response.data.task.status;
             } catch (error) {
                 console.error('Error fetching task details:', error);
             }

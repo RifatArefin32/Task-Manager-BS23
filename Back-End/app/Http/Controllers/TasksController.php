@@ -46,6 +46,17 @@ class TasksController extends Controller
         return auth()->user()->tasks;
     }
 
+    public function taskofid($id)
+    {
+        $task = auth()->user()->tasks()->find($id);
+
+        if (!$task) {
+            return response()->json(['message' => 'Task not found'], 404);
+        }
+
+        return response()->json(['task' => $task], 200);
+    }
+    
     public function update(Request $request,$id)
     {
          // Validate the request data
